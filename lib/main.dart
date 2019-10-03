@@ -1,9 +1,10 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-
 import 'package:connectivity/connectivity.dart';
+import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import './control.dart';
 
 void main() => runApp(WifiInfo());
 
@@ -76,30 +77,43 @@ class _WifiInfoStateState extends State<WifiInfoState> {
       appBar: AppBar(
         title: const Text('当前网络状态'),
       ),
-      body: Center(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 100),
-            child: Icon(
-              Icons.wifi,
-              size: 100,
+      body: SingleChildScrollView(
+        child: Center(
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 100),
+              child: Icon(
+                Icons.wifi,
+                size: 100,
+              ),
             ),
-          ),
-          Container(
-            height: 100,
-            width: 300,
-            child: Text("在启动设备并开启连接后，将手机连接到以 Tello 开头的 Wifi 网络。当前" +
-                (_connectivityResult == ConnectivityResult.wifi ? "已" : "未") +
-                "连接到 Wifi" +
-                (_connectivityResult == ConnectivityResult.wifi
-                    ? "，名称为 $_wifiName。"
-                    : "。")),
-          ),
-        ],
-      )),
+            Container(
+              height: 100,
+              width: 300,
+              child: Text("在启动设备并开启连接后，将手机连接到以 Tello 开头的 Wifi 网络。当前" +
+                  (_connectivityResult == ConnectivityResult.wifi ? "已" : "未") +
+                  "连接到 Wifi" +
+                  (_connectivityResult == ConnectivityResult.wifi
+                      ? "，名称为 $_wifiName。"
+                      : "。")),
+            ),
+            _connectivityResult == ConnectivityResult.wifi
+                ? FlatButton(
+                    child: const Text("开始控制"),
+                    onPressed: () {
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(builder: (context) {
+                        return Control();
+                      }));
+                    },
+                  )
+                : Container()
+          ],
+        )),
+      ),
     );
   }
 }
