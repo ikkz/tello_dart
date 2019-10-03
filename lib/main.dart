@@ -16,6 +16,7 @@ class WifiInfo extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: WifiInfoState(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -99,7 +100,7 @@ class _WifiInfoStateState extends State<WifiInfoState> {
                       : "。")),
             ),
             _connectivityResult == ConnectivityResult.wifi
-                ? FlatButton(
+                ? RaisedButton(
                     child: const Text("开始控制"),
                     onPressed: () {
                       Navigator.of(context)

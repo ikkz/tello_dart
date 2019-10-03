@@ -27,35 +27,47 @@ class _ControlState extends State<Control> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Column(
-      children: <Widget>[
-        Expanded(
-          child: Container(),
+        appBar: AppBar(
+          bottomOpacity: 1,
+          actions: <Widget>[
+            Icon(Icons.wifi),
+            Icon(Icons.airplanemode_active),
+          ]
+              .map((Widget icon) => Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 15),
+                    child: icon,
+                  ))
+              .toList(),
         ),
-        Row(
+        body: Column(
           children: <Widget>[
-            Padding(
-              padding: EdgeInsets.all(20),
-              child: Wheel(
-                width: 150,
-                height: 150,
-                indicatorRadius: 20,
-              ),
-            ),
             Expanded(
               child: Container(),
             ),
-            Padding(
-              padding: EdgeInsets.all(20),
-              child: Wheel(
-                width: 150,
-                height: 150,
-                indicatorRadius: 20,
-              ),
-            ),
+            Row(
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Wheel(
+                    width: 150,
+                    height: 150,
+                    indicatorRadius: 20,
+                  ),
+                ),
+                Expanded(
+                  child: Container(),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Wheel(
+                    width: 150,
+                    height: 150,
+                    indicatorRadius: 20,
+                  ),
+                ),
+              ],
+            )
           ],
-        )
-      ],
-    ));
+        ));
   }
 }
