@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:connectivity/connectivity.dart';
-import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import './control.dart';
@@ -61,8 +60,7 @@ class _WifiInfoStateState extends State<WifiInfoState> {
   }
 
   void _initConnectivity() async {
-    var ps = await PermissionHandler()
-        .requestPermissions([PermissionGroup.location]);
+    await PermissionHandler().requestPermissions([PermissionGroup.location]);
     var connectivityResult = await (Connectivity().checkConnectivity());
     var wifiName = await (Connectivity().getWifiName());
     this.setState(() {
