@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import './wheel.dart';
+import './tello.dart';
 
 class Control extends StatefulWidget {
   @override
@@ -9,6 +10,8 @@ class Control extends StatefulWidget {
 }
 
 class _ControlState extends State<Control> {
+  Tello _tello;
+
   @override
   void initState() {
     super.initState();
