@@ -1,61 +1,55 @@
 import 'dart:io';
-import 'package:h264/h264.dart';
-import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart';
+import 'dart:async';
 
-typedef VideoCallback = void Function(String);
+import 'package:udp/udp.dart';
+
+class FlipDirection {
+  static final String l = "l";
+  static final String r = "r";
+  static final String f = "f";
+  static final String b = "b";
+}
 
 class Tello {
-  String telloIp = "192.168.10.1";
-  int telloPort = 8889;
-  int telloVideoPort = 11111;
+  UDP _cmd;
 
-  VideoCallback videoCallback = (jpgPath) {};
+  final _telloAddr =
+      Endpoint.unicast(InternetAddress("192.168.10.1"), Port(8889));
 
-  Socket _cmdSocket;
-  Socket _videoSocket;
-
-  String _cmdResponse;
-
-  String _packetData = "";
-  String _videoFrame = "";
-
-  void _init() async {
-    final tmpPath = (await getTemporaryDirectory()).path;
-
-    _cmdSocket = await Socket.connect(telloIp, telloPort, sourceAddress: ":$telloPort");
-    _videoSocket = await Socket.connect(telloIp, telloVideoPort, sourceAddress: "$telloVideoPort");
-
-    _cmdSocket.listen((data) {
-      _cmdResponse = String.fromCharCodes(data);
-    });
-
-    _videoSocket.listen((data) async {
-      var resString = String.fromCharCodes(data);
-      _packetData += resString;
-      if (resString.length != 1460) {
-        var frame = File("$tmpPath/raw-frame");
-        frame.writeAsStringSync(_packetData);
-        var decoded = File("$tmpPath/decoded.jpg");
-        await H264.decodeFrame(frame.path, decoded.path, 2592, 1936);
-        videoCallback(decoded.path);
-      }
-    });
-
-    _cmdSocket.write("command");
-    _cmdSocket.write("streamon");
+  void connect() async {
+    _cmd = await UDP.bind(Endpoint.loopback(port: Port(8889)));
   }
 
-  Tello(
-      {@required this.localPort,
-      @required this.localIp,
-      this.telloIp,
-      this.telloPort}) {
-    _init();
+  Future<int> sendCommand(String command) async {
+    return _cmd == null ? -1 : await _cmd.send(command.codeUnits, _telloAddr);
   }
 
-  void del() {
-    _cmdSocket.close();
-    _videoSocket.close();
+  Future<int> takeoff() async {
+    return await sendCommand("takeoff");
+  }
+
+  Future<int> setSpeed(int speed) async {
+    return await sendCommand("speed $speed");
+  }
+
+  Future<int> rotateCw(int degrees) async {
+    return await sendCommand("cw $degrees");
+  }
+
+  Future<int> rotateCcw(int degrees) async {
+    return await sendCommand("ccw $degrees");
+  }
+
+  Future<int> flip(String flipDirection) async {
+    return await sendCommand("flip $flipDirection");
+  }
+
+  Future<int> land() async {
+    return await sendCommand("land");
+  }
+
+  void disconnect() {
+    _cmd.close();
+    _cmd = null;
   }
 }
