@@ -3,16 +3,14 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class Wheel extends StatefulWidget {
-  final double width;
-  final double height;
+  final double radius;
   final double indicatorRadius;
 
   final Color backgroundColor;
   final Color foregroundColor;
 
   Wheel(
-      {@required this.width,
-      @required this.height,
+      {@required this.radius,
       @required this.indicatorRadius,
       this.backgroundColor,
       this.foregroundColor});
@@ -26,20 +24,16 @@ class _WheelState extends State<Wheel> {
 
   void _updateOffset(Offset offset) {
     if (offset != null) {
+      var angle = asin((offset.dy - widget.radius) /
+          sqrt((offset.dx - widget.radius) * (offset.dx - widget.radius) +
+              (offset.dy - widget.radius) * (offset.dy - widget.radius)));
       offset = Offset(
-          offset.dx - widget.indicatorRadius < 0
-              ? (_offset == null ? widget.width / 2 : _offset.dx)
-              : offset.dx,
-          offset.dy - widget.indicatorRadius < 0
-              ? (_offset == null ? widget.height / 2 : _offset.dy)
-              : offset.dy);
-      offset = Offset(
-          offset.dx + widget.indicatorRadius > widget.width
-              ? (_offset == null ? widget.width / 2 : _offset.dx)
-              : offset.dx,
-          offset.dy + widget.indicatorRadius > widget.height
-              ? (_offset == null ? widget.height / 2 : _offset.dy)
-              : offset.dy);
+          widget.radius +
+              (offset.dx > widget.radius
+                  ? (widget.radius - widget.indicatorRadius) * cos(angle)
+                  : (widget.indicatorRadius - widget.radius) * cos(angle)),
+          widget.radius +
+              (widget.radius - widget.indicatorRadius) * sin(angle));
     }
     this.setState(() {
       _offset = offset;
@@ -49,15 +43,15 @@ class _WheelState extends State<Wheel> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: widget.width,
-      height: widget.height,
+      width: widget.radius * 2,
+      height: widget.radius * 2,
       child: GestureDetector(
         child: Center(
           child: Stack(
             children: <Widget>[
               CircleAvatar(
                 foregroundColor: widget.backgroundColor ?? Colors.blue.shade300,
-                radius: min(widget.width, widget.height) / 2,
+                radius: widget.radius,
               ),
               _offset == null
                   ? Container()

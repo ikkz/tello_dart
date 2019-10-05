@@ -10,7 +10,6 @@ class Control extends StatefulWidget {
 }
 
 class _ControlState extends State<Control> {
-
   @override
   void initState() {
     super.initState();
@@ -51,8 +50,7 @@ class _ControlState extends State<Control> {
                 Padding(
                   padding: EdgeInsets.all(20),
                   child: Wheel(
-                    width: 150,
-                    height: 150,
+                    radius: 100,
                     indicatorRadius: 20,
                   ),
                 ),
@@ -62,8 +60,7 @@ class _ControlState extends State<Control> {
                 Padding(
                   padding: EdgeInsets.all(20),
                   child: Wheel(
-                    width: 150,
-                    height: 150,
+                    radius: 100,
                     indicatorRadius: 20,
                   ),
                 ),
