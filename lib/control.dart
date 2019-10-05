@@ -10,7 +10,6 @@ class Control extends StatefulWidget {
 }
 
 class _ControlState extends State<Control> {
-  Tello _tello;
 
   @override
   void initState() {

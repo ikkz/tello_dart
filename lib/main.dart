@@ -4,6 +4,7 @@ import 'package:connectivity/connectivity.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import './control.dart';
+import './tello.dart';
 
 void main() => runApp(WifiInfo());
 
@@ -31,10 +32,13 @@ class _WifiInfoStateState extends State<WifiInfoState> {
   ConnectivityResult _connectivityResult = ConnectivityResult.none;
   String _wifiName = "none";
   StreamSubscription<ConnectivityResult> _subscription;
+  String _command;
+  Tello _tello = Tello();
 
   @override
   void initState() {
     super.initState();
+    _tello.connect();
 
     _initConnectivity();
     _subscription = Connectivity()
@@ -109,7 +113,24 @@ class _WifiInfoStateState extends State<WifiInfoState> {
                       }));
                     },
                   )
-                : Container()
+                : Container(),
+            Container(
+              width: 300,
+              child: TextField(
+                onChanged: (s) {
+                  _command = s;
+                },
+              ),
+            ),
+            RaisedButton(
+              child: Text("发送"),
+              onPressed: () {
+                print("cmd: $_command");
+                print(_tello.sendCommand(_command ?? "", (s) {
+                  print(s);
+                }));
+              },
+            )
           ],
         )),
       ),
