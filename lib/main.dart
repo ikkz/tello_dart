@@ -4,7 +4,6 @@ import 'package:connectivity/connectivity.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import './control.dart';
-import './tello.dart';
 
 void main() => runApp(WifiInfo());
 

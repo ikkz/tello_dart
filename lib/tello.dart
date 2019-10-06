@@ -13,13 +13,6 @@ class FlipDirection {
   static final String b = "b";
 }
 
-class CmdResponseCallback {
-  DateTime time;
-  void Function(String) callback;
-
-  CmdResponseCallback(this.time, this.callback);
-}
-
 typedef TelloSuccessCallback = void Function(bool success);
 
 class Tello {
@@ -28,7 +21,7 @@ class Tello {
   StreamSubscription _cmdSubscription;
   StreamSubscription _stateSubscription;
 
-  Queue<CmdResponseCallback> _listeners = Queue<CmdResponseCallback>();
+  Queue<void Function(String)> _listeners = Queue<void Function(String)>();
 
   var telloPort = 8889;
   var telloStatePort = 8890;
@@ -36,15 +29,8 @@ class Tello {
 
   void _cmdResponseListener(String data) {
     debugPrint("recv response: $data");
-    final now = DateTime.now();
-    while (_listeners.isNotEmpty &&
-        now.millisecondsSinceEpoch -
-                _listeners.first.time.millisecondsSinceEpoch >
-            1000) {
-      _listeners.removeFirst();
-    }
     if (_listeners.isNotEmpty) {
-      _listeners.removeFirst().callback(data);
+      _listeners.removeFirst()(data);
     }
   }
 
@@ -83,7 +69,7 @@ class Tello {
       return 0;
     } else {
       debugPrint("send command: $command");
-      _listeners.addLast(CmdResponseCallback(DateTime.now(), callback));
+      _listeners.addLast(callback);
       final res = _cmdSocket.send(utf8.encode(command), telloAddr, telloPort);
       return res;
     }

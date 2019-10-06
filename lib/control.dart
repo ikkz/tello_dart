@@ -12,8 +12,8 @@ class Control extends StatefulWidget {
 
 class _ControlState extends State<Control> {
   Tello _tello;
-  final _moveDistance = 20;
-  final _udDistance = 50;
+  var _moveDistance = 50;
+  var _udDistance = 50;
   var height = 0;
   var battery = 100;
 
@@ -77,6 +77,27 @@ class _ControlState extends State<Control> {
         _tello?.moveRight(_moveDistance, (b) {});
         break;
       default:
+    }
+  }
+
+  void _setDistance() async {
+    final moveDistance = await SimpleDialogs.editText(
+        context: context,
+        title: "请输入前后左右一次移动的距离",
+        defaultText: _moveDistance.toString());
+    if (moveDistance != null) {
+      this.setState(() {
+        _moveDistance = int.parse(moveDistance);
+      });
+    }
+    final udDistance = await SimpleDialogs.editText(
+        context: context,
+        title: "请输入上下一次移动的距离",
+        defaultText: _udDistance.toString());
+    if (moveDistance != null) {
+      this.setState(() {
+        _udDistance = int.parse(udDistance);
+      });
     }
   }
 
@@ -150,6 +171,10 @@ class _ControlState extends State<Control> {
               onPressed: () {
                 _execCmd();
               },
+            ),
+            IconButton(
+              icon: Icon(Icons.settings),
+              onPressed: _setDistance,
             )
           ]
               .map((Widget icon) => Padding(
