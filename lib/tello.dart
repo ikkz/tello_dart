@@ -4,6 +4,8 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
+
 class FlipDirection {
   static final String l = "l";
   static final String r = "r";
@@ -30,6 +32,7 @@ class Tello {
   var telloAddr = InternetAddress("192.168.10.1");
 
   void _cmdResponseListener(String data) {
+    debugPrint("recv response: $data");
     final now = DateTime.now();
     while (_listeners.isNotEmpty &&
         now.millisecondsSinceEpoch -
@@ -58,6 +61,7 @@ class Tello {
     if (_cmdSocket == null) {
       return 0;
     } else {
+      debugPrint("send command: $command");
       _listeners.addLast(CmdResponseCallback(DateTime.now(), callback));
       final res = _cmdSocket.send(utf8.encode(command), telloAddr, telloPort);
       return res;

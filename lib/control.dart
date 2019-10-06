@@ -12,6 +12,7 @@ class Control extends StatefulWidget {
 
 class _ControlState extends State<Control> {
   Tello _tello;
+  final _moveDistance = 20;
 
   void _init() async {
     _tello = Tello();
@@ -35,7 +36,7 @@ class _ControlState extends State<Control> {
   void _land() async {
     final res = await SimpleDialogs.alert(context: context, content: "确认降落吗？");
     if (res == true) {
-      _tello.takeoff((b) {
+      _tello.land((b) {
         if (b) {
           SimpleDialogs.alert(context: context, content: "降落成功");
         }
@@ -50,6 +51,42 @@ class _ControlState extends State<Control> {
       _tello?.sendCommand(cmd, (s) {
         SimpleDialogs.alert(context: context, title: "收到如下返回值", content: s);
       });
+    }
+  }
+
+  void _move(WheelDirection wheelDirection) {
+    switch (wheelDirection) {
+      case WheelDirection.Forward:
+        _tello?.moveForward(_moveDistance, (b) {});
+        break;
+      case WheelDirection.Backward:
+        _tello?.moveBackward(_moveDistance, (b) {});
+        break;
+      case WheelDirection.Left:
+        _tello?.moveLeft(_moveDistance, (b) {});
+        break;
+      case WheelDirection.Right:
+        _tello?.moveRight(_moveDistance, (b) {});
+        break;
+      default:
+    }
+  }
+
+  void _moveUd(WheelDirection wheelDirection) {
+    switch (wheelDirection) {
+      case WheelDirection.Forward:
+        _tello?.moveUp(_moveDistance, (b) {});
+        break;
+      case WheelDirection.Backward:
+        _tello?.moveDown(_moveDistance, (b) {});
+        break;
+      // case WheelDirection.Left:
+      //   _tello?.moveLeft(_moveDistance, (b) {});
+      //   break;
+      // case WheelDirection.Right:
+      //   _tello?.moveRight(_moveDistance, (b) {});
+      //   break;
+      default:
     }
   }
 
@@ -112,7 +149,7 @@ class _ControlState extends State<Control> {
                   padding: EdgeInsets.all(20),
                   child: Wheel(
                     radius: 100,
-                    indicatorRadius: 20,
+                    directionCallback: _moveUd,
                   ),
                 ),
                 Expanded(
@@ -122,7 +159,7 @@ class _ControlState extends State<Control> {
                   padding: EdgeInsets.all(20),
                   child: Wheel(
                     radius: 100,
-                    indicatorRadius: 20,
+                    directionCallback: _move,
                   ),
                 ),
               ],
