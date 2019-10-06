@@ -1,16 +1,34 @@
-# special_journey
+# Tello无人机 dart demo
 
-A new Flutter project.
+## lib/tello.dart
 
-## Getting Started
+### 初始化
+``` dart
+_tello = Tello();
 
-This project is a starting point for a Flutter application.
+// 初始化连接，并设置无人机高度电量信息回调
+await _tello.connect((h, bat) {
+  debugPrint("height: $h, battery: $bat");
+});
+// 发送 command 命令进入无人机 SDK 模式才能发送后续命令s
+_tello?.sendCommand("command", (s) {
+  debugPrint(s);
+});
+```
 
-A few resources to get you started if this is your first Flutter project:
+### 发送命令
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+移动，翻转，旋转等，所有命令发送都是同步函数，可以设置无人机响应回调。
+``` dart
+_tello.land((bool success) {
+if (success) {
+  debugPrint("降落成功");
+}
+});
+```
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### 结束操作
+```dart
+// 同一 Tello 实例可多次 connect 与 disconnect
+_tello.disconnect();
+```
