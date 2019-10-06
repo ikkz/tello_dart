@@ -13,10 +13,18 @@ class Control extends StatefulWidget {
 class _ControlState extends State<Control> {
   Tello _tello;
   final _moveDistance = 20;
+  final _udDistance = 50;
+  var height = 0;
+  var battery = 100;
 
   void _init() async {
     _tello = Tello();
-    await _tello.connect();
+    await _tello.connect((h, bat) {
+      this.setState(() {
+        height = h;
+        battery = bat;
+      });
+    });
     _tello?.sendCommand("command", (s) {
       print(s);
     });
@@ -75,10 +83,10 @@ class _ControlState extends State<Control> {
   void _moveUd(WheelDirection wheelDirection) {
     switch (wheelDirection) {
       case WheelDirection.Forward:
-        _tello?.moveUp(_moveDistance, (b) {});
+        _tello?.moveUp(_udDistance, (b) {});
         break;
       case WheelDirection.Backward:
-        _tello?.moveDown(_moveDistance, (b) {});
+        _tello?.moveDown(_udDistance, (b) {});
         break;
       // case WheelDirection.Left:
       //   _tello?.moveLeft(_moveDistance, (b) {});
@@ -113,6 +121,18 @@ class _ControlState extends State<Control> {
         appBar: AppBar(
           bottomOpacity: 1,
           actions: <Widget>[
+            Row(
+              children: <Widget>[
+                Icon(Icons.battery_std),
+                Text(battery.toString())
+              ],
+            ),
+            Row(
+              children: <Widget>[
+                Icon(Icons.import_export),
+                Text("${height / 100} m")
+              ],
+            ),
             IconButton(
               icon: Icon(Icons.flight_takeoff),
               onPressed: () {

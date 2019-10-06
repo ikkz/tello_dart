@@ -24,11 +24,14 @@ typedef TelloSuccessCallback = void Function(bool success);
 
 class Tello {
   RawDatagramSocket _cmdSocket;
+  RawDatagramSocket _stateSocket;
   StreamSubscription _cmdSubscription;
+  StreamSubscription _stateSubscription;
 
   Queue<CmdResponseCallback> _listeners = Queue<CmdResponseCallback>();
 
   var telloPort = 8889;
+  var telloStatePort = 8890;
   var telloAddr = InternetAddress("192.168.10.1");
 
   void _cmdResponseListener(String data) {
@@ -45,7 +48,7 @@ class Tello {
     }
   }
 
-  Future<void> connect() async {
+  Future<void> connect(Function(int height, int bat) stateCallback) async {
     _listeners.clear();
     _cmdSocket =
         await RawDatagramSocket.bind(InternetAddress.anyIPv4, telloPort);
@@ -53,6 +56,24 @@ class Tello {
     _cmdSubscription = _cmdSocket.listen((event) {
       if (event == RawSocketEvent.read) {
         _cmdResponseListener(String.fromCharCodes(_cmdSocket.receive().data));
+      }
+    });
+
+    _stateSocket =
+        await RawDatagramSocket.bind(InternetAddress.anyIPv4, telloStatePort);
+    _stateSocket.broadcastEnabled = true;
+    _stateSubscription = _stateSocket.listen((event) {
+      if (event == RawSocketEvent.read && stateCallback != null) {
+        final stateStr = String.fromCharCodes(_stateSocket.receive().data);
+        final states = stateStr.split(";");
+        Map map = Map<String, String>();
+        for (var item in states) {
+          final kv = item.split(":");
+          if (kv.length == 2) {
+            map[kv[0]] = kv[1];
+          }
+        }
+        stateCallback(int.parse(map["h"]), int.parse(map["bat"]));
       }
     });
   }
@@ -145,5 +166,10 @@ class Tello {
     _cmdSocket?.close();
     _cmdSubscription = null;
     _cmdSocket = null;
+
+    _stateSubscription?.cancel();
+    _stateSocket?.close();
+    _stateSubscription = null;
+    _stateSocket = null;
   }
 }
