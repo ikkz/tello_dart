@@ -94,7 +94,7 @@ class _ControlState extends State<Control> {
         context: context,
         title: "请输入上下一次移动的距离",
         defaultText: _udDistance.toString());
-    if (moveDistance != null) {
+    if (udDistance != null) {
       this.setState(() {
         _udDistance = int.parse(udDistance);
       });
