@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import './wheel.dart';
 import './tello.dart';
+import './simple_dialogs.dart';
 
 class Control extends StatefulWidget {
   @override
@@ -10,9 +11,52 @@ class Control extends StatefulWidget {
 }
 
 class _ControlState extends State<Control> {
+  Tello _tello;
+
+  void _init() async {
+    _tello = Tello();
+    await _tello.connect();
+    _tello?.sendCommand("command", (s) {
+      print(s);
+    });
+  }
+
+  void _takeoff() async {
+    final res = await SimpleDialogs.alert(context: context, content: "确认起飞吗？");
+    if (res == true) {
+      _tello.takeoff((b) {
+        if (b) {
+          SimpleDialogs.alert(context: context, content: "起飞成功");
+        }
+      });
+    }
+  }
+
+  void _land() async {
+    final res = await SimpleDialogs.alert(context: context, content: "确认降落吗？");
+    if (res == true) {
+      _tello.takeoff((b) {
+        if (b) {
+          SimpleDialogs.alert(context: context, content: "降落成功");
+        }
+      });
+    }
+  }
+
+  void _execCmd() async {
+    final cmd = await SimpleDialogs.editText(
+        context: context, title: "请输入要执行的命令", defaultText: "land");
+    if (cmd != null && cmd.isNotEmpty) {
+      _tello?.sendCommand(cmd, (s) {
+        SimpleDialogs.alert(context: context, title: "收到如下返回值", content: s);
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _init();
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
     SystemChrome.setEnabledSystemUIOverlays([]);
@@ -23,6 +67,7 @@ class _ControlState extends State<Control> {
     super.dispose();
     SystemChrome.setPreferredOrientations([]);
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    _tello?.disconnect();
   }
 
   @override
@@ -31,8 +76,24 @@ class _ControlState extends State<Control> {
         appBar: AppBar(
           bottomOpacity: 1,
           actions: <Widget>[
-            Icon(Icons.wifi),
-            Icon(Icons.airplanemode_active),
+            IconButton(
+              icon: Icon(Icons.flight_takeoff),
+              onPressed: () {
+                _takeoff();
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.flight_land),
+              onPressed: () {
+                _land();
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.send),
+              onPressed: () {
+                _execCmd();
+              },
+            )
           ]
               .map((Widget icon) => Padding(
                     padding: EdgeInsets.symmetric(horizontal: 15),

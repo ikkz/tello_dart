@@ -11,24 +11,38 @@ class FlipDirection {
   static final String b = "b";
 }
 
+class CmdResponseCallback {
+  DateTime time;
+  void Function(String) callback;
+
+  CmdResponseCallback(this.time, this.callback);
+}
+
 typedef TelloSuccessCallback = void Function(bool success);
 
 class Tello {
   RawDatagramSocket _cmdSocket;
   StreamSubscription _cmdSubscription;
 
-  Queue<void Function(String)> _listeners = Queue<void Function(String)>();
+  Queue<CmdResponseCallback> _listeners = Queue<CmdResponseCallback>();
 
   var telloPort = 8889;
   var telloAddr = InternetAddress("192.168.10.1");
 
   void _cmdResponseListener(String data) {
+    final now = DateTime.now();
+    while (_listeners.isNotEmpty &&
+        now.millisecondsSinceEpoch -
+                _listeners.first.time.millisecondsSinceEpoch >
+            1000) {
+      _listeners.removeFirst();
+    }
     if (_listeners.isNotEmpty) {
-      _listeners.removeFirst()(data);
+      _listeners.removeFirst().callback(data);
     }
   }
 
-  void connect() async {
+  Future<void> connect() async {
     _listeners.clear();
     _cmdSocket =
         await RawDatagramSocket.bind(InternetAddress.anyIPv4, telloPort);
@@ -44,11 +58,8 @@ class Tello {
     if (_cmdSocket == null) {
       return 0;
     } else {
-      _listeners.addLast(callback);
+      _listeners.addLast(CmdResponseCallback(DateTime.now(), callback));
       final res = _cmdSocket.send(utf8.encode(command), telloAddr, telloPort);
-      if (res == 0) {
-        _listeners.removeLast();
-      }
       return res;
     }
   }
