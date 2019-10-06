@@ -17,13 +17,12 @@ _tello?.sendCommand("command", (s) {
 ```
 
 ### 发送命令
-
 移动，翻转，旋转等，所有命令发送都是同步函数，可以设置无人机响应回调。
 ``` dart
 _tello.land((bool success) {
-if (success) {
-  debugPrint("降落成功");
-}
+  if (success) {
+    debugPrint("降落成功");
+  }
 });
 ```
 
